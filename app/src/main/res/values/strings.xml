@@ -3,10 +3,8 @@
     <string name="history">History</string>
     <string name="hr_details">HR details</string>
     <string name="workout">Workout</string>
-    <string name="target_heart_rate">Target Heart Rate</string>
-    <string name="min">Min</string>
-    <string name="maximum">Maximum</string>
-    <string name="minimum">Minimum</string>
-    <string name="target_duration">Target Duration</string>
-    <string name="target_distance">Target Distance</string>
+    <string name="min_hr">Min HR</string>
+    <string name="max_hr">Max HR</string>
+    <string name="duration">Duration</string>
+    <string name="distance">Distance</string>
 </resources>
