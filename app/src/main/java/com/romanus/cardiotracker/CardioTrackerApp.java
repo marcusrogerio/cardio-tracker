@@ -2,7 +2,7 @@ package com.romanus.cardiotracker;
 
 import android.app.Application;
 
-import com.romanus.cardiotracker.domain.AppModule;
+import com.romanus.cardiotracker.modules.AppModule;
 
 /**
  * Created by roman on 6/12/16.

@@ -1,4 +1,4 @@
-package com.romanus.cardiotracker.domain;
+package com.romanus.cardiotracker.modules;
 
 import android.content.Context;
 

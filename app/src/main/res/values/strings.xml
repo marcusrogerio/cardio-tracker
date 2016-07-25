@@ -7,4 +7,6 @@
     <string name="max_hr">Max HR</string>
     <string name="duration">Duration</string>
     <string name="distance">Distance</string>
+    <string name="ble_not_supported">BLE not supported</string>
+    <string name="bluetooth_not_supported">Bluetooth not supported</string>
 </resources>
