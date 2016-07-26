@@ -19,11 +19,15 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.romanus.cardiotracker.CardioTrackerApp;
 import com.romanus.cardiotracker.R;
 import com.romanus.cardiotracker.ui.history.HistoryFragment;
+import com.romanus.cardiotracker.ui.settings.SettingsActivity;
 import com.romanus.cardiotracker.ui.workout.WorkoutFragment;
 import com.romanus.cardiotracker.ui.zones.HRZonesDetialsFragment;
 import com.romanus.cardiotracker.util.Utils;
@@ -69,6 +73,29 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         checkPermissions();
         checkBluetoothEnabled();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.item_settings : {
+                launchSettingsScreen();
+                return true;
+            }
+            default : return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void launchSettingsScreen() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
     private void checkBluetoothEnabled() {
