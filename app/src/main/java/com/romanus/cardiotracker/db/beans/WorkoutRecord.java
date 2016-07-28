@@ -1,4 +1,4 @@
-package com.romanus.cardiotracker.db;
+package com.romanus.cardiotracker.db.beans;
 
 /**
  * Created by roman on 6/12/16.

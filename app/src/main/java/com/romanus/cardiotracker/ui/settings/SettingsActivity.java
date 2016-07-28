@@ -1,6 +1,7 @@
 package com.romanus.cardiotracker.ui.settings;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,7 +14,9 @@ import com.romanus.cardiotracker.CardioTrackerApp;
 import com.romanus.cardiotracker.R;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -45,9 +48,34 @@ public class SettingsActivity extends Activity implements SettingsView {
     }
 
     @Override
-    public void onNewDeviceDetected(String deviceName) {
+    protected void onStart() {
+        super.onStart();
+        presenter.startScanForDevices();
+    }
+
+    @Override
+    protected void onStop() {
+        presenter.stopScanForDevices();
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        presenter.onDestroy();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onDevicesDetected(Set<BluetoothDevice> devices) {
         DeviceInfoAdapter adapter = (DeviceInfoAdapter) devicesList.getAdapter();
-        adapter.getDevices().add(deviceName);
+
+        List<String> devicesName = new ArrayList<>();
+        Iterator<BluetoothDevice> iterator = devices.iterator();
+        while (iterator.hasNext()) {
+            devicesName.add(iterator.next().getName());
+        }
+
+        adapter.getDevices().addAll(devicesName);
         adapter.notifyDataSetChanged();
     }
 

@@ -5,23 +5,30 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.os.Handler;
+import android.util.Log;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by roman on 6/12/16.
  */
 public class BluetoothAPIImpl implements BluetoothAPI {
+    private static final String TAG = BluetoothAPIImpl.class.getSimpleName();
+    private static final long SCAN_PERIOD = 5000;
     private boolean isScanning;
     private Handler handler = new Handler();
     private BluetoothAdapter bluetoothAdapter;
-    private static final long SCAN_PERIOD = 20000;
     private BluetoothAPI.ScanCallback scanCallback;
     private Context context;
+    private Set<BluetoothDevice> devices = new HashSet<>();
 
     private BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             if (scanCallback != null) {
-                scanCallback.onDeviceFound(device);
+                Log.d(TAG, "Address: " + device.getAddress() + "   Name: " + device.getName());
+                devices.add(device);
             }
         }
     };
@@ -36,12 +43,20 @@ public class BluetoothAPIImpl implements BluetoothAPI {
             initBluetoothAdapter();
         }
 
+        // clear results of previous search
+        devices.clear();
+
         // Stops scanning after a pre-defined scan period.
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 isScanning = false;
                 bluetoothAdapter.stopLeScan(leScanCallback);
+
+                // return found devices
+                if (scanCallback != null) {
+                    scanCallback.onDevicesFound(devices);
+                }
             }
         }, SCAN_PERIOD);
 

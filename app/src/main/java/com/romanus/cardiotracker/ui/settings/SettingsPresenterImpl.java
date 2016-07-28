@@ -2,35 +2,64 @@ package com.romanus.cardiotracker.ui.settings;
 
 import android.bluetooth.BluetoothDevice;
 
-import com.romanus.cardiotracker.bluetooth.BluetoothAPI;
+import com.romanus.cardiotracker.bluetooth.BluetoothDeviceManager;
+
+import java.util.Set;
+
+import rx.Observer;
+import rx.Subscription;
 
 /**
  * Created by roman on 7/26/16.
  */
 public class SettingsPresenterImpl implements SettingsPresenter {
 
-    private BluetoothAPI bluetoothAPI;
+    private BluetoothDeviceManager bluetoothDeviceManager;
     private SettingsView settingsView;
+    private Subscription subscription;
 
-    public SettingsPresenterImpl(BluetoothAPI bluetoothAPI) {
-        this.bluetoothAPI = bluetoothAPI;
+    public SettingsPresenterImpl(BluetoothDeviceManager bluetoothDeviceManager) {
+        this.bluetoothDeviceManager = bluetoothDeviceManager;
     }
 
     @Override
     public void setView(SettingsView settingsView) {
         this.settingsView = settingsView;
-        startLookingForDevices();
     }
 
-    private void startLookingForDevices() {
-        bluetoothAPI.setScanCallback(new BluetoothAPI.ScanCallback() {
+    @Override
+    public void startScanForDevices() {
+        subscription = bluetoothDeviceManager.scanForBLEDevices().subscribe(new Observer<Set<BluetoothDevice>>() {
             @Override
-            public void onDeviceFound(BluetoothDevice device) {
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onNext(Set<BluetoothDevice> bluetoothDevices) {
                 if (settingsView != null) {
-                    settingsView.onNewDeviceDetected(device.getName());
+                    settingsView.onDevicesDetected(bluetoothDevices);
                 }
             }
         });
-        bluetoothAPI.startScanLeDevices();
+    }
+
+    @Override
+    public void stopScanForDevices() {
+        if (subscription != null) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
+        bluetoothDeviceManager.stopScan();
+    }
+
+    @Override
+    public void onDestroy() {
+
     }
 }
