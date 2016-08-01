@@ -1,10 +1,11 @@
 package com.romanus.cardiotracker.ui.settings;
 
-import android.bluetooth.BluetoothDevice;
+import android.util.Log;
 
 import com.romanus.cardiotracker.bluetooth.BluetoothDeviceManager;
+import com.romanus.cardiotracker.db.beans.SavedBluetoothDevice;
 
-import java.util.Set;
+import java.util.List;
 
 import rx.Observer;
 import rx.Subscription;
@@ -14,9 +15,11 @@ import rx.Subscription;
  */
 public class SettingsPresenterImpl implements SettingsPresenter {
 
+    private static final String TAG = SettingsPresenterImpl.class.getSimpleName();
     private BluetoothDeviceManager bluetoothDeviceManager;
     private SettingsView settingsView;
-    private Subscription subscription;
+    private Subscription scanSubscription;
+    private Subscription loadSubscription;
 
     public SettingsPresenterImpl(BluetoothDeviceManager bluetoothDeviceManager) {
         this.bluetoothDeviceManager = bluetoothDeviceManager;
@@ -29,7 +32,11 @@ public class SettingsPresenterImpl implements SettingsPresenter {
 
     @Override
     public void startScanForDevices() {
-        subscription = bluetoothDeviceManager.scanForBLEDevices().subscribe(new Observer<Set<BluetoothDevice>>() {
+        if (settingsView != null) {
+            settingsView.showScanProgress(true);
+        }
+
+        scanSubscription = bluetoothDeviceManager.scanForBLEDevices().subscribe(new Observer<List<SavedBluetoothDevice>>() {
             @Override
             public void onCompleted() {
 
@@ -37,13 +44,36 @@ public class SettingsPresenterImpl implements SettingsPresenter {
 
             @Override
             public void onError(Throwable e) {
+                Log.e(TAG, "Error occurred while scanning devices", e);
+            }
+
+            @Override
+            public void onNext(List<SavedBluetoothDevice> savedBluetoothDevices) {
+                if (settingsView != null) {
+                    settingsView.onScannedDevicesDetected(savedBluetoothDevices);
+                    settingsView.showScanProgress(false);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void loadSavedDevices() {
+        loadSubscription = bluetoothDeviceManager.getBLEDevicesFromDB().subscribe(new Observer<List<SavedBluetoothDevice>>() {
+            @Override
+            public void onCompleted() {
 
             }
 
             @Override
-            public void onNext(Set<BluetoothDevice> bluetoothDevices) {
+            public void onError(Throwable e) {
+                Log.e(TAG, "Error occurred while loading devices from DB", e);
+            }
+
+            @Override
+            public void onNext(List<SavedBluetoothDevice> savedBluetoothDevices) {
                 if (settingsView != null) {
-                    settingsView.onDevicesDetected(bluetoothDevices);
+                    settingsView.onSavedDevicesLoaded(savedBluetoothDevices);
                 }
             }
         });
@@ -51,9 +81,9 @@ public class SettingsPresenterImpl implements SettingsPresenter {
 
     @Override
     public void stopScanForDevices() {
-        if (subscription != null) {
-            subscription.unsubscribe();
-            subscription = null;
+        if (scanSubscription != null) {
+            scanSubscription.unsubscribe();
+            scanSubscription = null;
         }
         bluetoothDeviceManager.stopScan();
     }

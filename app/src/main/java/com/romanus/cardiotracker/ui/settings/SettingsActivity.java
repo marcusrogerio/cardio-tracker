@@ -8,10 +8,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.romanus.cardiotracker.CardioTrackerApp;
 import com.romanus.cardiotracker.R;
+import com.romanus.cardiotracker.db.beans.SavedBluetoothDevice;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,14 +25,27 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by roman on 7/26/16.
  */
 public class SettingsActivity extends Activity implements SettingsView {
 
-    @BindView(R.id.rv_devices_list)
-    RecyclerView devicesList;
+    @BindView(R.id.rv_scanned_devices_list)
+    RecyclerView scannedDevicesList;
+
+    @BindView(R.id.rv_saved_devices_list)
+    RecyclerView savedDevicesList;
+
+    @BindView(R.id.bt_scan)
+    Button scanButton;
+
+    @BindView(R.id.pb_progress)
+    ProgressBar progressBar;
+
+    @BindView(R.id.tv_scan_status)
+    TextView scanStatusTextView;
 
     @Inject
     SettingsPresenter presenter;
@@ -43,14 +59,11 @@ public class SettingsActivity extends Activity implements SettingsView {
         CardioTrackerApp.getAppComponent().inject(this);
         presenter.setView(this);
 
-        devicesList.setLayoutManager(new LinearLayoutManager(this));
-        devicesList.setAdapter(new DeviceInfoAdapter());
-    }
+        scannedDevicesList.setLayoutManager(new LinearLayoutManager(this));
+        scannedDevicesList.setAdapter(new DeviceInfoAdapter());
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        presenter.startScanForDevices();
+        savedDevicesList.setLayoutManager(new LinearLayoutManager(this));
+        savedDevicesList.setAdapter(new DeviceInfoAdapter());
     }
 
     @Override
@@ -65,18 +78,48 @@ public class SettingsActivity extends Activity implements SettingsView {
         super.onDestroy();
     }
 
+    @OnClick(R.id.bt_scan)
+    public void onScanClicked(View view) {
+        presenter.startScanForDevices();
+    }
+
     @Override
-    public void onDevicesDetected(Set<BluetoothDevice> devices) {
-        DeviceInfoAdapter adapter = (DeviceInfoAdapter) devicesList.getAdapter();
+    public void onScannedDevicesDetected(List<SavedBluetoothDevice> devices) {
+        DeviceInfoAdapter adapter = (DeviceInfoAdapter) scannedDevicesList.getAdapter();
 
         List<String> devicesName = new ArrayList<>();
-        Iterator<BluetoothDevice> iterator = devices.iterator();
-        while (iterator.hasNext()) {
-            devicesName.add(iterator.next().getName());
+        for (SavedBluetoothDevice savedBluetoothDevice : devices) {
+            devicesName.add(savedBluetoothDevice.getName());
         }
 
+        adapter.getDevices().clear();
         adapter.getDevices().addAll(devicesName);
         adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onSavedDevicesLoaded(List<SavedBluetoothDevice> devices) {
+        DeviceInfoAdapter adapter = (DeviceInfoAdapter) savedDevicesList.getAdapter();
+
+        List<String> devicesName = new ArrayList<>();
+        for (SavedBluetoothDevice savedBluetoothDevice : devices) {
+            devicesName.add(savedBluetoothDevice.getName());
+        }
+
+        adapter.getDevices().clear();
+        adapter.getDevices().addAll(devicesName);
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void showScanProgress(boolean show) {
+        if (show) {
+            progressBar.setVisibility(View.VISIBLE);
+            scanStatusTextView.setText("Scanning");
+        } else {
+            progressBar.setVisibility(View.INVISIBLE);
+            scanStatusTextView.setText("Stopped");
+        }
     }
 
     class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoViewHolder> {

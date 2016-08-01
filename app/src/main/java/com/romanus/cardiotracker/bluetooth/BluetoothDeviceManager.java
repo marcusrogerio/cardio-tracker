@@ -3,6 +3,7 @@ package com.romanus.cardiotracker.bluetooth;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
+import com.romanus.cardiotracker.db.DBManager;
 import com.romanus.cardiotracker.db.DataBaseHelper;
 import com.romanus.cardiotracker.db.beans.SavedBluetoothDevice;
 import com.romanus.cardiotracker.util.RxHelper;
@@ -23,11 +24,11 @@ public class BluetoothDeviceManager {
 
     private static final String TAG = BluetoothDeviceManager.class.getSimpleName();
     private BluetoothAPI bluetoothAPI;
-    private DataBaseHelper dataBaseHelper;
+    private DBManager dbManager;
 
-    public BluetoothDeviceManager(BluetoothAPI bluetoothAPI, DataBaseHelper dataBaseHelper) {
+    public BluetoothDeviceManager(BluetoothAPI bluetoothAPI, DBManager dbManager) {
         this.bluetoothAPI = bluetoothAPI;
-        this.dataBaseHelper = dataBaseHelper;
+        this.dbManager = dbManager;
     }
 
     public Observable<List<SavedBluetoothDevice>> scanForBLEDevices() {
@@ -59,7 +60,7 @@ public class BluetoothDeviceManager {
             @Override
             public void call(final Subscriber<? super List<SavedBluetoothDevice>> subscriber) {
                 try {
-                    List<SavedBluetoothDevice> savedBluetoothDevices = dataBaseHelper.getBluetoothDeviceDao().queryForAll();
+                    List<SavedBluetoothDevice> savedBluetoothDevices = dbManager.getBluetoothDeviceDao().queryForAll();
 
                     if (subscriber != null && !subscriber.isUnsubscribed()) {
                         subscriber.onNext(savedBluetoothDevices);
@@ -97,7 +98,7 @@ public class BluetoothDeviceManager {
     private void updateDB(Set<BluetoothDevice> scannedDevices) {
         try {
             for (SavedBluetoothDevice newDevice : convertData(scannedDevices)) {
-                dataBaseHelper.getBluetoothDeviceDao().createIfNotExists(newDevice);
+                dbManager.getBluetoothDeviceDao().createIfNotExists(newDevice);
             }
 
         } catch (SQLException e) {

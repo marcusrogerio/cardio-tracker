@@ -6,6 +6,7 @@ package com.romanus.cardiotracker.ui.settings;
 public interface SettingsPresenter {
     void setView(SettingsView settingsView);
     void startScanForDevices();
+    void loadSavedDevices();
     void stopScanForDevices();
     void onDestroy();
 }
