@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -85,29 +86,17 @@ public class SettingsActivity extends Activity implements SettingsView {
 
     @Override
     public void onScannedDevicesDetected(List<SavedBluetoothDevice> devices) {
-        DeviceInfoAdapter adapter = (DeviceInfoAdapter) scannedDevicesList.getAdapter();
-
-        List<String> devicesName = new ArrayList<>();
-        for (SavedBluetoothDevice savedBluetoothDevice : devices) {
-            devicesName.add(savedBluetoothDevice.getName());
-        }
-
-        adapter.getDevices().clear();
-        adapter.getDevices().addAll(devicesName);
-        adapter.notifyDataSetChanged();
+        updateDeviceList((DeviceInfoAdapter) scannedDevicesList.getAdapter(), devices);
     }
 
     @Override
     public void onSavedDevicesLoaded(List<SavedBluetoothDevice> devices) {
-        DeviceInfoAdapter adapter = (DeviceInfoAdapter) savedDevicesList.getAdapter();
+        updateDeviceList((DeviceInfoAdapter) savedDevicesList.getAdapter(), devices);
+    }
 
-        List<String> devicesName = new ArrayList<>();
-        for (SavedBluetoothDevice savedBluetoothDevice : devices) {
-            devicesName.add(savedBluetoothDevice.getName());
-        }
-
+    private void updateDeviceList(DeviceInfoAdapter adapter, List<SavedBluetoothDevice> devices) {
         adapter.getDevices().clear();
-        adapter.getDevices().addAll(devicesName);
+        adapter.getDevices().addAll(devices);
         adapter.notifyDataSetChanged();
     }
 
@@ -122,11 +111,15 @@ public class SettingsActivity extends Activity implements SettingsView {
         }
     }
 
+    private void onDeviceClicked(SavedBluetoothDevice device) {
+        presenter.onDeviceSelected(device);
+    }
+
     class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoViewHolder> {
 
-        private List<String> devices = new ArrayList<>();
+        private List<SavedBluetoothDevice> devices = new ArrayList<>();
 
-        public List<String> getDevices() {
+        public List<SavedBluetoothDevice> getDevices() {
             return devices;
         }
 
@@ -138,8 +131,15 @@ public class SettingsActivity extends Activity implements SettingsView {
 
         @Override
         public void onBindViewHolder(DeviceInfoViewHolder holder, int position) {
-            String deviceName = devices.get(position);
-            holder.textView.setText(deviceName);
+            final SavedBluetoothDevice device = devices.get(position);
+
+            holder.textView.setText(device.getName());
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onDeviceClicked(device);
+                }
+            });
         }
 
         @Override

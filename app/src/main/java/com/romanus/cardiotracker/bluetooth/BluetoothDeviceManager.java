@@ -105,4 +105,8 @@ public class BluetoothDeviceManager {
             Log.e(TAG, "Error updating bluetooth devices DB");
         }
     }
+
+    public void connectToDevice(SavedBluetoothDevice device) {
+
+    }
 }

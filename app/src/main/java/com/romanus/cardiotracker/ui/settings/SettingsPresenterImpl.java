@@ -92,4 +92,9 @@ public class SettingsPresenterImpl implements SettingsPresenter {
     public void onDestroy() {
 
     }
+
+    @Override
+    public void onDeviceSelected(SavedBluetoothDevice device) {
+        bluetoothDeviceManager.connectToDevice(device);
+    }
 }
