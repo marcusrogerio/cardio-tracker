@@ -18,7 +18,7 @@ public class UtilsImpl implements Utils {
     @Override
     public boolean isBluetoothSupported() {
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
-        // BluetoothAdapter through BluetoothAPIImpl
+        // BluetoothAdapter through BluetoothScannerImpl
         BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
 
         // Checks if Bluetooth is supported on the device.

@@ -2,6 +2,7 @@ package com.romanus.cardiotracker.ui.settings;
 
 import android.util.Log;
 
+import com.romanus.cardiotracker.bluetooth.BLEDeviceManager;
 import com.romanus.cardiotracker.bluetooth.BluetoothDeviceManager;
 import com.romanus.cardiotracker.db.beans.SavedBluetoothDevice;
 
@@ -16,13 +17,13 @@ import rx.Subscription;
 public class SettingsPresenterImpl implements SettingsPresenter {
 
     private static final String TAG = SettingsPresenterImpl.class.getSimpleName();
-    private BluetoothDeviceManager bluetoothDeviceManager;
+    private BLEDeviceManager bleDeviceManager;
     private SettingsView settingsView;
     private Subscription scanSubscription;
     private Subscription loadSubscription;
 
-    public SettingsPresenterImpl(BluetoothDeviceManager bluetoothDeviceManager) {
-        this.bluetoothDeviceManager = bluetoothDeviceManager;
+    public SettingsPresenterImpl(BLEDeviceManager bleDeviceManager) {
+        this.bleDeviceManager = bleDeviceManager;
     }
 
     @Override
@@ -36,7 +37,7 @@ public class SettingsPresenterImpl implements SettingsPresenter {
             settingsView.showScanProgress(true);
         }
 
-        scanSubscription = bluetoothDeviceManager.scanForBLEDevices().subscribe(new Observer<List<SavedBluetoothDevice>>() {
+        scanSubscription = bleDeviceManager.scanForBLEDevices().subscribe(new Observer<List<SavedBluetoothDevice>>() {
             @Override
             public void onCompleted() {
 
@@ -59,7 +60,7 @@ public class SettingsPresenterImpl implements SettingsPresenter {
 
     @Override
     public void loadSavedDevices() {
-        loadSubscription = bluetoothDeviceManager.getBLEDevicesFromDB().subscribe(new Observer<List<SavedBluetoothDevice>>() {
+        loadSubscription = bleDeviceManager.getBLEDevicesFromDB().subscribe(new Observer<List<SavedBluetoothDevice>>() {
             @Override
             public void onCompleted() {
 
@@ -85,7 +86,7 @@ public class SettingsPresenterImpl implements SettingsPresenter {
             scanSubscription.unsubscribe();
             scanSubscription = null;
         }
-        bluetoothDeviceManager.stopScan();
+        bleDeviceManager.stopScan();
     }
 
     @Override
@@ -95,6 +96,6 @@ public class SettingsPresenterImpl implements SettingsPresenter {
 
     @Override
     public void onDeviceSelected(SavedBluetoothDevice device) {
-        bluetoothDeviceManager.connectToDevice(device);
+        bleDeviceManager.connectToDevice(device);
     }
 }

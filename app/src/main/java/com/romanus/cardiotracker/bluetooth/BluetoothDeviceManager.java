@@ -31,7 +31,7 @@ import rx.Subscriber;
 public class BluetoothDeviceManager implements BLEDeviceManager {
 
     private static final String TAG = BluetoothDeviceManager.class.getSimpleName();
-    private BluetoothAPI bluetoothAPI;
+    private BluetoothScanner bluetoothScanner;
     private DBManager dbManager;
     private Context context;
     private String deviceAddress;
@@ -62,6 +62,10 @@ public class BluetoothDeviceManager implements BLEDeviceManager {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+
+            Log.i("-----------" + TAG, action);
+            Log.i("-----------" + TAG, intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
                 if (bluetoothDeviceCallback != null) {
                     bluetoothDeviceCallback.onDeviceConnected(deviceAddress);
@@ -79,8 +83,8 @@ public class BluetoothDeviceManager implements BLEDeviceManager {
         }
     };
 
-    public BluetoothDeviceManager(BluetoothAPI bluetoothAPI, DBManager dbManager, Context context) {
-        this.bluetoothAPI = bluetoothAPI;
+    public BluetoothDeviceManager(BluetoothScanner bluetoothScanner, DBManager dbManager, Context context) {
+        this.bluetoothScanner = bluetoothScanner;
         this.dbManager = dbManager;
         this.context = context;
 
@@ -98,7 +102,7 @@ public class BluetoothDeviceManager implements BLEDeviceManager {
             public void call(final Subscriber<? super List<SavedBluetoothDevice>> subscriber) {
                 if (subscriber != null && !subscriber.isUnsubscribed()) {
 
-                    bluetoothAPI.setScanCallback(new BluetoothAPI.ScanCallback() {
+                    bluetoothScanner.setScanCallback(new BluetoothScanner.ScanCallback() {
                         @Override
                         public void onDevicesFound(Set<BluetoothDevice> devices) {
                             updateDB(devices);
@@ -106,7 +110,7 @@ public class BluetoothDeviceManager implements BLEDeviceManager {
                             subscriber.onCompleted();
                         }
                     });
-                    bluetoothAPI.startScanLeDevices();
+                    bluetoothScanner.startScanLeDevices();
                 }
             }
         }).compose(RxHelper.<List<SavedBluetoothDevice>>getSchedulers());
@@ -114,7 +118,7 @@ public class BluetoothDeviceManager implements BLEDeviceManager {
 
     @Override
     public void stopScan() {
-        bluetoothAPI.stopScanLeDevices();
+        bluetoothScanner.stopScanLeDevices();
     }
 
     @Override
@@ -134,7 +138,7 @@ public class BluetoothDeviceManager implements BLEDeviceManager {
                         subscriber.onError(e);
                     }
                 }
-                bluetoothAPI.startScanLeDevices();
+                bluetoothScanner.startScanLeDevices();
 
             }
         }).compose(RxHelper.<List<SavedBluetoothDevice>>getSchedulers());

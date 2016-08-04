@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * Created by roman on 7/26/16.
  */
-public interface BluetoothAPI {
+public interface BluetoothScanner {
 
     interface ScanCallback {
         void onDevicesFound(Set<BluetoothDevice> devices);

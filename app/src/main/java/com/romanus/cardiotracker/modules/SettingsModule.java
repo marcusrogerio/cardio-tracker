@@ -1,5 +1,6 @@
 package com.romanus.cardiotracker.modules;
 
+import com.romanus.cardiotracker.bluetooth.BLEDeviceManager;
 import com.romanus.cardiotracker.bluetooth.BluetoothDeviceManager;
 import com.romanus.cardiotracker.ui.settings.SettingsPresenter;
 import com.romanus.cardiotracker.ui.settings.SettingsPresenterImpl;
@@ -17,8 +18,8 @@ public class SettingsModule {
 
     @Provides
     @Singleton
-    public SettingsPresenter provideSettingsPresenter(BluetoothDeviceManager bluetoothDeviceManager) {
-        return new SettingsPresenterImpl(bluetoothDeviceManager);
+    public SettingsPresenter provideSettingsPresenter(BLEDeviceManager bleDeviceManager) {
+        return new SettingsPresenterImpl(bleDeviceManager);
     }
 
 

@@ -17,6 +17,8 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.romanus.cardiotracker.bluetooth.GattAttributes;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -49,7 +51,7 @@ public class BluetoothLeService extends Service {
             "com.romanus.cardiotracker.util.bluetooth.le.EXTRA_DATA";
 
     public final static UUID UUID_HEART_RATE_MEASUREMENT =
-            UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
+            UUID.fromString(GattAttributes.HEART_RATE_MEASUREMENT);
 
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
@@ -76,6 +78,14 @@ public class BluetoothLeService extends Service {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
+
+                List<BluetoothGattService> services = gatt.getServices();
+                for (BluetoothGattService bluetoothGattService : services) {
+                    if (GattAttributes.HEART_RATE_MEASUREMENT.equalsIgnoreCase(bluetoothGattService.getUuid().toString())) {
+                        setCharacteristicNotification(bluetoothGattService.getCharacteristic(UUID.fromString(GattAttributes.HEART_RATE_MEASUREMENT)), true);
+                    }
+                }
+
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
@@ -155,7 +165,7 @@ public class BluetoothLeService extends Service {
      */
     public boolean initialize() {
         // For API level 18 and above, get a reference to BluetoothAdapter through
-        // BluetoothAPIImpl.
+        // BluetoothScannerImpl.
         if (bluetoothService == null) {
             bluetoothService = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
             if (bluetoothService == null) {
@@ -273,7 +283,7 @@ public class BluetoothLeService extends Service {
         // This is specific to Heart Rate Measurement.
         if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                    UUID.fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
+                    UUID.fromString(GattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
             descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
             bluetoothGatt.writeDescriptor(descriptor);
         }

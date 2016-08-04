@@ -10,7 +10,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 007;
     private static final int REQUEST_ENABLE_BT = 001;
+    private static final int REQUEST_ENABLE_LOCATION = 002;
     @BindView(R.id.viewpager)
     ViewPager viewPager;
 
@@ -73,7 +76,10 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         checkPermissions();
         checkBluetoothEnabled();
+        checkBluetoothLocationEnabled();
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -102,6 +108,15 @@ public class MainActivity extends AppCompatActivity {
         if (!utils.isBluetoothEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+    }
+
+    private void checkBluetoothLocationEnabled() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        boolean locationEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (!locationEnabled) {
+            Intent enableLocationIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivityForResult(enableLocationIntent, REQUEST_ENABLE_LOCATION);
         }
     }
 
@@ -149,10 +164,20 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // User chose not to enable Bluetooth.
-        if (requestCode == REQUEST_ENABLE_BT && resultCode == Activity.RESULT_CANCELED) {
-            finish();
-            return;
+        switch (requestCode) {
+            case REQUEST_ENABLE_BT : {
+                if (resultCode == Activity.RESULT_CANCELED) {
+                    Toast.makeText(this, "Bluetooth is needed.", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            } return;
+
+            case REQUEST_ENABLE_LOCATION : {
+                if (resultCode == Activity.RESULT_CANCELED) {
+                    Toast.makeText(this, "Location service is needed.", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            } return;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

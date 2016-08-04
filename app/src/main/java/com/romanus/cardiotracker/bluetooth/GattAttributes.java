@@ -1,13 +1,14 @@
-package com.romanus.cardiotracker.util;
+package com.romanus.cardiotracker.bluetooth;
 
 import java.util.HashMap;
 
 /**
  * Created by roman on 7/22/16.
  */
-public class SampleGattAttributes {
+public class GattAttributes {
     private static HashMap<String, String> attributes = new HashMap();
     public static String HEART_RATE_MEASUREMENT = "00002a37-0000-1000-8000-00805f9b34fb";
+    public static String HEART_RATE_SERVICE = "0000180d-0000-1000-8000-00805f9b34fb";
     public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
 
     static {

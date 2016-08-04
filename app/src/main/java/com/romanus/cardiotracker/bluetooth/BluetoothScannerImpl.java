@@ -13,13 +13,13 @@ import java.util.Set;
 /**
  * Created by roman on 6/12/16.
  */
-public class BluetoothAPIImpl implements BluetoothAPI {
-    private static final String TAG = BluetoothAPIImpl.class.getSimpleName();
-    private static final long SCAN_PERIOD = 5000;
+public class BluetoothScannerImpl implements BluetoothScanner {
+    private static final String TAG = BluetoothScannerImpl.class.getSimpleName();
+    private static final long SCAN_PERIOD = 10000;
     private boolean isScanning;
     private Handler handler = new Handler();
     private BluetoothAdapter bluetoothAdapter;
-    private BluetoothAPI.ScanCallback scanCallback;
+    private BluetoothScanner.ScanCallback scanCallback;
     private Context context;
     private Set<BluetoothDevice> devices = new HashSet<>();
 
@@ -33,7 +33,7 @@ public class BluetoothAPIImpl implements BluetoothAPI {
         }
     };
 
-    public BluetoothAPIImpl(Context context) {
+    public BluetoothScannerImpl(Context context) {
         this.context = context;
     }
 

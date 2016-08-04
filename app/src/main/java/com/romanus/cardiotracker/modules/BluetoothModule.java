@@ -2,11 +2,11 @@ package com.romanus.cardiotracker.modules;
 
 import android.content.Context;
 
-import com.romanus.cardiotracker.bluetooth.BluetoothAPI;
-import com.romanus.cardiotracker.bluetooth.BluetoothAPIImpl;
+import com.romanus.cardiotracker.bluetooth.BLEDeviceManager;
+import com.romanus.cardiotracker.bluetooth.BluetoothScanner;
+import com.romanus.cardiotracker.bluetooth.BluetoothScannerImpl;
 import com.romanus.cardiotracker.bluetooth.BluetoothDeviceManager;
 import com.romanus.cardiotracker.db.DBManager;
-import com.romanus.cardiotracker.db.DataBaseHelper;
 
 import javax.inject.Singleton;
 
@@ -21,13 +21,13 @@ public class BluetoothModule {
 
     @Singleton
     @Provides
-    public BluetoothAPI providesBluetoothAPI(Context context) {
-        return new BluetoothAPIImpl(context);
+    public BluetoothScanner providesBluetoothAPI(Context context) {
+        return new BluetoothScannerImpl(context);
     }
 
     @Singleton
     @Provides
-    public BluetoothDeviceManager providesBluetoothDeviceManager(BluetoothAPI bluetoothAPI, DBManager dbManager) {
-        return new BluetoothDeviceManager(bluetoothAPI, dbManager);
+    public BLEDeviceManager providesBluetoothDeviceManager(BluetoothScanner bluetoothScanner, DBManager dbManager, Context context) {
+        return new BluetoothDeviceManager(bluetoothScanner, dbManager, context);
     }
 }
