@@ -5,6 +5,7 @@ package com.romanus.cardiotracker.bluetooth;
  */
 public interface BluetoothDeviceCallback {
     void onDeviceConnected(String address);
+    void onDeviceConnecting(String address);
     void onDeviceDisconnected(String address);
-    void onDataUpdated(Object data);
+    void onDataUpdated(Object data, String address);
 }

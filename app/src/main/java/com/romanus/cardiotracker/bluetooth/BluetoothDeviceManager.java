@@ -13,7 +13,6 @@ import android.util.Log;
 
 import com.romanus.cardiotracker.db.DBManager;
 import com.romanus.cardiotracker.db.beans.SavedBluetoothDevice;
-import com.romanus.cardiotracker.util.BluetoothLeService;
 import com.romanus.cardiotracker.util.RxHelper;
 
 import java.sql.SQLException;
@@ -77,7 +76,7 @@ public class BluetoothDeviceManager implements BLEDeviceManager {
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 String data = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
                 if (bluetoothDeviceCallback != null) {
-                    bluetoothDeviceCallback.onDataUpdated(data);
+                    bluetoothDeviceCallback.onDataUpdated(data, deviceAddress);
                 }
             }
         }
@@ -149,6 +148,10 @@ public class BluetoothDeviceManager implements BLEDeviceManager {
         deviceAddress = device.getAddress();
         Intent gattServiceIntent = new Intent(context, BluetoothLeService.class);
         context.bindService(gattServiceIntent, serviceConnection, context.BIND_AUTO_CREATE);
+
+        if (bluetoothDeviceCallback != null) {
+            bluetoothDeviceCallback.onDeviceConnecting(device.getAddress());
+        }
     }
 
     @Override

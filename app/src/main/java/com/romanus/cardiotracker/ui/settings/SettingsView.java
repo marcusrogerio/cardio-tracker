@@ -11,5 +11,8 @@ public interface SettingsView {
     void onScannedDevicesDetected(List<SavedBluetoothDevice> devices);
     void onSavedDevicesLoaded(List<SavedBluetoothDevice> devices);
     void showScanProgress(boolean show);
-
+    void showDeviceConnected(String address);
+    void showDeviceConnecting(String address);
+    void showDeviceDisconnected(String address);
+    void heartRateUpdated(int data, String address);
 }

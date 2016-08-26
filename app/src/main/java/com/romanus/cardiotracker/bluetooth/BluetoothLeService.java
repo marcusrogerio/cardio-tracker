@@ -1,4 +1,4 @@
-package com.romanus.cardiotracker.util;
+package com.romanus.cardiotracker.bluetooth;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -16,8 +16,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
-import com.romanus.cardiotracker.bluetooth.GattAttributes;
 
 import java.util.List;
 import java.util.UUID;
@@ -81,8 +79,10 @@ public class BluetoothLeService extends Service {
 
                 List<BluetoothGattService> services = gatt.getServices();
                 for (BluetoothGattService bluetoothGattService : services) {
-                    if (GattAttributes.HEART_RATE_MEASUREMENT.equalsIgnoreCase(bluetoothGattService.getUuid().toString())) {
-                        setCharacteristicNotification(bluetoothGattService.getCharacteristic(UUID.fromString(GattAttributes.HEART_RATE_MEASUREMENT)), true);
+                    if (GattAttributes.HEART_RATE_SERVICE.equalsIgnoreCase(bluetoothGattService.getUuid().toString())) {
+                        UUID characteristicUUID = UUID.fromString(GattAttributes.HEART_RATE_MEASUREMENT);
+                        BluetoothGattCharacteristic gattCharacteristic = bluetoothGattService.getCharacteristic(characteristicUUID);
+                        setCharacteristicNotification(gattCharacteristic, true);
                     }
                 }
 
@@ -116,24 +116,31 @@ public class BluetoothLeService extends Service {
     private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
 
-        // This is special handling for the Heart Rate Measurement profile.  Data parsing is
-        // carried out as per profile specifications:
-        // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
         if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
-            int flag = characteristic.getProperties();
-            int format = -1;
-            if ((flag & 0x01) != 0) {
-                format = BluetoothGattCharacteristic.FORMAT_UINT16;
-                Log.d(TAG, "Heart rate format UINT16.");
-            } else {
-                format = BluetoothGattCharacteristic.FORMAT_UINT8;
-                Log.d(TAG, "Heart rate format UINT8.");
-            }
-            final int heartRate = characteristic.getIntValue(format, 1);
-            Log.d(TAG, String.format("Received heart rate: %d", heartRate));
-            intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
+            String heartRate = extractHeartRate(characteristic);
+            intent.putExtra(EXTRA_DATA, heartRate);
             LocalBroadcastManager.getInstance(BluetoothLeService.this).sendBroadcast(intent);
         }
+    }
+
+    // This is special handling for the Heart Rate Measurement profile.  Data parsing is
+    // carried out as per profile specifications:
+    // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
+    private String extractHeartRate(BluetoothGattCharacteristic characteristic) {
+        int flag = characteristic.getProperties();
+        int format = -1;
+
+        if ((flag & 0x01) != 0) {
+            format = BluetoothGattCharacteristic.FORMAT_UINT16;
+            Log.d(TAG, "Heart rate format UINT16.");
+        } else {
+            format = BluetoothGattCharacteristic.FORMAT_UINT8;
+            Log.d(TAG, "Heart rate format UINT8.");
+        }
+
+        int heartRate = characteristic.getIntValue(format, 1);
+        Log.d(TAG, String.format("Received heart rate: %d", heartRate));
+        return String.valueOf(heartRate);
     }
 
     public class LocalBinder extends Binder {

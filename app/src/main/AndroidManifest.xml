@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.settings.SettingsActivity" android:screenOrientation="portrait"/>
-        <service android:name=".util.BluetoothLeService" android:enabled="true"/>
+        <service android:name=".bluetooth.BluetoothLeService" android:enabled="true"/>
     </application>
 
 </manifest>

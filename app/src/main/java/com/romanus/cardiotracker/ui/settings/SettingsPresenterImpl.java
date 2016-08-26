@@ -3,7 +3,7 @@ package com.romanus.cardiotracker.ui.settings;
 import android.util.Log;
 
 import com.romanus.cardiotracker.bluetooth.BLEDeviceManager;
-import com.romanus.cardiotracker.bluetooth.BluetoothDeviceManager;
+import com.romanus.cardiotracker.bluetooth.BluetoothDeviceCallback;
 import com.romanus.cardiotracker.db.beans.SavedBluetoothDevice;
 
 import java.util.List;
@@ -21,9 +21,44 @@ public class SettingsPresenterImpl implements SettingsPresenter {
     private SettingsView settingsView;
     private Subscription scanSubscription;
     private Subscription loadSubscription;
+    private BluetoothDeviceCallback bluetoothDeviceCallback = new BluetoothDeviceCallback() {
+        @Override
+        public void onDeviceConnected(String address) {
+            if (settingsView != null) {
+                settingsView.showDeviceConnected(address);
+            }
+        }
+
+        @Override
+        public void onDeviceConnecting(String address) {
+            if (settingsView != null) {
+                settingsView.showDeviceConnecting(address);
+            }
+        }
+
+        @Override
+        public void onDeviceDisconnected(String address) {
+            if (settingsView != null) {
+                settingsView.showDeviceDisconnected(address);
+            }
+        }
+
+        @Override
+        public void onDataUpdated(Object data, String address) {
+            if (settingsView != null && (data instanceof String)) {
+                try {
+                    int heartRate = Integer.parseInt((String)data);
+                    settingsView.heartRateUpdated(heartRate, address);
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "Wrong Data format", e);
+                }
+            }
+        }
+    };
 
     public SettingsPresenterImpl(BLEDeviceManager bleDeviceManager) {
         this.bleDeviceManager = bleDeviceManager;
+        this.bleDeviceManager.setBluetoothDeviceCallback(bluetoothDeviceCallback);
     }
 
     @Override
